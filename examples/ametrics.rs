@@ -1,13 +1,20 @@
 use anyhow::Result;
 use rand::Rng;
-use rust_concurrency::Metrics;
+use rust_concurrency::AmapMetrics;
 use std::thread;
 
 const N: usize = 2;
 const M: usize = 4;
 
 fn main() -> Result<()> {
-    let metrics = Metrics::new();
+    let metrics = AmapMetrics::new(&[
+        "call.thread.task_worker.0",
+        "call.thread.task_worker.1",
+        "req.page.0",
+        "req.page.1",
+        "req.page.2",
+        "req.page.3",
+    ]);
     println!("{}", metrics);
 
     for idx in 0..N {
@@ -26,7 +33,7 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-fn task_worker(idx: usize, metrics: Metrics) -> Result<()> {
+fn task_worker(idx: usize, metrics: AmapMetrics) -> Result<()> {
     thread::spawn(move || {
         loop {
             let mut rng = rand::thread_rng();
@@ -39,12 +46,12 @@ fn task_worker(idx: usize, metrics: Metrics) -> Result<()> {
     Ok(())
 }
 
-fn request_worker(metrics: Metrics) -> Result<()> {
+fn request_worker(metrics: AmapMetrics) -> Result<()> {
     thread::spawn(move || {
         loop {
             let mut rng = rand::thread_rng();
             thread::sleep(std::time::Duration::from_millis(rng.gen_range(50..800)));
-            let page = rng.gen_range(1..5);
+            let page = rng.gen_range(0..5);
             metrics.inc(format!("req.page.{}", page))?;
         }
         #[allow(unreachable_code)]
