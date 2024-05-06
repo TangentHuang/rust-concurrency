@@ -1,7 +1,7 @@
 use crate::{dot_product, Vector};
 use anyhow::Result;
 use std::fmt::Formatter;
-use std::ops::{Add, Mul};
+use std::ops::{Add, AddAssign, Mul};
 use std::sync::mpsc;
 use std::{fmt, thread};
 
@@ -29,7 +29,7 @@ pub struct Msg<T> {
 
 pub fn multiply<T>(a: &Matrix<T>, b: &Matrix<T>) -> Result<Matrix<T>>
 where
-    T: Copy + Default + Mul<Output = T> + Add<Output = T> + Send + std::ops::AddAssign + 'static,
+    T: Copy + Default + Mul<Output = T> + Add<Output = T> + AddAssign + Send + 'static,
 {
     if a.cols != b.rows {
         return Err(anyhow::anyhow!("Invalid matrix dimensions"));
